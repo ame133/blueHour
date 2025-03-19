@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CONSULTAR INSTRUCTOR</title>
+
+	<link rel="stylesheet" type="text/css" href="/includes/css/css_general.css">
+	<script type="text/javascript" src="/includes/js/fetch/solicitud_fetch.js"></script>
+	<script type="text/javascript" src="/includes/js/combosBox/comboBox.js"></script>
+	<script type="text/javascript" src="/includes/js/formularios/desplegarDatosFormularios.js"></script>
+
+	<script>
+			window.addEventListener("load", function(){
+				// *********************************************
+				// accion = 0 Ninguna
+				// accion = 1 Nuevo
+				// accion = 2 Modificars
+				// **********************************************
+				let accion = 0;
+
+				// ****************************************** 
+				//BOTONES
+				// ******************************************
+				let btn_nuevo     = document.getElementById('btn_nuevo');
+				let btn_modificar = document.getElementById("btn_modificar");
+				let btn_gardar    = document.getElementById("btn_guardar");
+				let btn_eliminar  = document.getElementById("btn_eliminar");
+				let btn_limpiar   = document.getElementById("btn_limpiar");
+
+				// ******************************************************
+				// Elementos de captura
+				// ******************************************************
+				let id = document.getElementById('id');
+				let nombre = document.getElementById("nombre");
+				let usuario = document.getElementById("usuario");
+				let correo  = document.getElementById("correo");
+				let fecha_creacion = document.getElementById("fecha_creacion");
+				let fecha_modificacion = document.getElementById("fecha_modificacion");
+
+				/******************************************************************
+				MENSAJES 
+				******************************************************************/
+				let mensaje        = document.getElementById('ms');
+				let mensaje_titulo = document.getElementById('msg_titulo');
+				let mensaje_cuerpo = document.getElementById('msg_cuerpo');			
+
+				/***************************************************************
+				Cerrar la caja de dialogo del mensaje
+				***************************************************************/
+				let obj_cerrar = document.getElementById("cerrar");
+				obj_cerrar.addEventListener("click", function(){
+					mensaje.close();
+				});
+
+
+				/******************************************************
+				Vamos a la API a traernos los datos del cliente
+				seleccionado en la Tabla
+				*******************************************************/
+
+				// *********************************************************
+				//Recuperamos el valor guardado en el localStorage o bien en el
+				//sessionStorage
+				//**********************************************************
+				//let id = localStorage.getItem('id_instructor');
+				let id_instructor = sessionStorage.getItem('id_instructor');
+
+				let url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=id_instructor&operadorRelTo==&valueTo=${id_instructor}`;
+
+				let init_un_instructor = {
+					method : 'get',
+				  	header : {
+				  		'Content-Type': 'application/json'
+				  	}
+				}
+
+				solicitarUnInstructor(url_un_instructor, init_un_instructor);
+				
+				async function solicitarUnInstructor(url, init) {
+				  const objJSdatos = await fetchSynchronousGET(url, init);
+				  //La funcion desplegarInformacionUnInstructor
+				  //Se encuentra en el script desplegarDatosformularios
+				  let resultadoDesplegar = desplegarInformacionUnInstructor(objJSdatos);
+				  if(resultadoDesplegar != null){
+
+						mensaje_titulo.innerText = resultadoDesplegar.titulo;
+						mensaje_cuerpo.innerText = resultadoDesplegar.mensaje;	
+						mensaje.showModal();
+				  }else{
+				  		//Selecionar la opcion correcta cuando lo localiza
+				  		let cbo_Instructores = document.getElementById("cbo_instructores");
+				  		let datos = objJSdatos.datos; //Sin comillas
+				  		let instructor = datos[0];
+				  		idInstructor = instructor.id_instructor;
+						cbo_Instructores.value = idInstructor;
+
+				  }
+				}
+
+				// **************************************************************
+				 
+				//Vamos a la API A TRAERNOS A TODOS LOS INSTRUCTORES PARA LLENAR EL
+				//COMBO BOX DE BUSQUEDA 
+				
+				//Tenga en cuenta que el fetch trabaja de forma asincrona por lo tanto
+				//no se sabe a ciencia sierta cual de los 2 fetch va a terminar primero.
+
+				//Cuando se utilizan reiteradamente los mismos datos hubiese convenido haber
+				//guardado los datos (cuando se consultaron para la tabla) de los instructores 
+				//en un localStorage o bien en un  localStorage o mucho mejor en un indexedDB:
+				//https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/
+				//Basic_Terminology
+				//https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB				 
+				
+				// ***************************************************************
+
+				//let contenedor = document.getElementById("instructores");
+				let url_instructores = `http://apirest.com/instructors?columnas=*&orderBy=name_instructor&orderMode=ASC`;
+
+				let init_instructores = {
+					method : 'get',
+				  	header : {
+				  		'Content-Type': 'application/json'
+				  	}
+				}
+
+				solicitarTodosInstructores(url_instructores, init_instructores);
+				
+				async function solicitarTodosInstructores(url, init) {
+				  const objJSdatos = await fetchSynchronousGET(url, init);
+				  prepararDatosComboBox(objJSdatos);
+				}
+				
+				//*******************************************************
+				// Funciones para desplegar los datos 
+				  
+				// ******************************************************
+				function prepararDatosComboBox(respuesta){
+					id = document.getElementById("id").value;
+					datos = respuesta.datos;
+					cbo_instructores = document.getElementById("cbo_instructores");
+					let campos = {
+						value     : "id_instructor",
+						contenido : "name_instructor"
+					}
+					desplegarDatosComboBox(campos, cbo_instructores, datos, id);
+				}
+
+
+				// ***************************************************************
+				//EVENTO DEL COMBO BOX DE BUSQUEDA
+				//En este ejemplo este elemento se utiliza principalmente para realizar 
+				//una busqueda por lo tanto tenemos que programar el evento change  
+				// ****************************************************************
+				
+
+				
+				let cbo_instructores = document.getElementById("cbo_instructores");
+				cbo_instructores.addEventListener("change", ()=>{
+
+					let id = cbo_instructores.value;
+					// **********************************************
+					//Cada ves que encuentra a alguien ya sea por:
+					// 1 La tabla del script anterior
+					// 2 Con el Combo Box de busqueda
+					// 3 Con el text de busqueda
+					// Se debe actualizar el valor de la 
+					// variable de session id_instructor
+					//sessionStorage.setItem('id_instructor', id);
+
+					url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=id_instructor&operadorRelTo==&valueTo=${id}`;
+
+					init_un_instructor = {
+						method : 'get',
+					  	header : {
+					  		'Content-Type': 'application/json'
+					  	}
+					}
+					
+					solicitarUnInstructor(url_un_instructor, init_un_instructor);
+
+
+
+					// ******************************************** 
+					//Recuerde que la propiedad de los elementos
+					//para activar o desactivar es disables
+					//Por tal motivo true los pone no disponibles
+					// y false lso pone disponibles
+					// ********************************************
+					activarBotones(true, false, true, false);
+
+				});
+
+				// *************************************************************
+				//EVENTO DE LA CAJA DE TEXTO DE BUSQUEDA
+				//En este ejemplo este elemento se utiliza principalmente para realizar una busqueda por lo tanto tenemos que programar el evento change  
+				// *****************************************************************
+				
+				let txt_busqueda = document.getElementById("txt_busqueda");
+				
+				txt_busqueda.addEventListener("input", ()=>{
+					let nombre = txt_busqueda.value;
+					//alert("EL ID DEL SELECCIONADO ES: " + nombre);
+
+					// ******************************************************
+					//Vamos a la API a traernos los datos de ese cliente
+					// ******************************************************
+
+					url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=name_instructor&operadorRelTo=like&valueTo=${nombre}%`;
+
+					init_un_instructor = {
+						method : 'get',
+					  	header : {
+					  		'Content-Type': 'application/json'
+					  	}
+					}
+
+					solicitarUnInstructor(url_un_instructor, init_un_instructor);
+
+					activarBotones(true, false, true, false);
+
+				});
+
+
+				// ****************************************************************
+				//  EVENTOS BOTON NUEVO
+				// ****************************************************************
+				btn_nuevo.addEventListener("click", ()=>{
+					accion = 1;
+					limpiar();
+					activarCaptura(true, false);
+					activarBotones(false, true, false, true);
+				});
+
+
+				btn_modificar.addEventListener("click", ()=>{
+					accion = 2;
+					activarCaptura(true, false);
+					activarBotones(true, true, false, true);
+				});
+
+				btn_guardar.addEventListener("click", ()=>{
+					if(accion == 1){
+						url_nuevo = "http://apirest.com/instructors";
+
+						const formulario = document.getElementById("datos_instructor");
+						const datosForm  = new FormData(formulario);
+						//Es importante mencionar que el input cuya propiedad id = id,
+						// no tiene la propiedad name por lo tanto no se agrega al
+						// objeto datosForm.
+						//lo mismo sucede con el input id='fecha_modificacion' 
+						const datosObjJS = Object.fromEntries(datosForm); 
+						const datosJSON  = JSON.stringify(datosObjJS);
+
+						/*
+						let objetoJS = {
+						    name_instructor: "LUIS", 
+						    username_instructor: "luis", 
+						    email_instructor:"luis@gmail.com", 
+						    date_create_instructor: "2023-10-10", 
+						}
+
+						//let datosJSON = JSON.stringify(datosObjJS); 
+						*/
+
+						init_nuevo = {
+							method : 'post',
+						  	header : {
+						  		'Content-Type': 'application/json'
+						  	},
+						  	body : datosJSON
+						}
+
+						instructor_post(url_nuevo, init_nuevo);
+						
+						async function instructor_post(url, init) {
+
+							const objJSdatos = await fetchSynchronousPOST(url, init);
+							let estatus     = objJSdatos.status;
+							let id          = objJSdatos.id;
+							let titulo      = objJSdatos.titulo;
+							let msg_request = objJSdatos.mensaje;
+
+							document.getElementById("id").value = id;
+							mensaje_titulo.innerText = titulo;
+							mensaje_cuerpo.innerText = msg_request;	
+							mensaje.showModal();
+
+							if(estatus == 200){
+
+							}		
+
+						}
+					}else if(accion == 2){
+						//MODIFICAR PUT
+						let url_modificar = "http://apirest.com/instructors";
+
+						const formulario = document.getElementById("datos_instructor");
+						const datosForm  = new FormData(formulario);
+
+						const datosObjJS = Object.fromEntries(datosForm); 
+						const datosJSON  = JSON.stringify(datosObjJS);
+
+						//Necesitamos el id para mandarlo por el head
+						id = document.getElementById("id").value;
+
+						// ************************************************************
+						// IMPORTANTE
+						//Observe el objeto init_modificar, concretamente el objeto
+						//header, aqui le enviamos el nombre de la llave primaria de 
+						//la tabla de la base de datos y su valor en 2 propiedades que 
+						//que su nombre deben ser: id y idValor respectivamente.
+						// Observar las lineas 28 del script put.routes.php del API
+						// y las lineas 14 y 16 del script put.model.php del API
+
+						let init_modificar = {
+							method : 'put',
+							headers : {
+								'Content-Type': 'application/json',
+								'id': 'id_instructor',
+								'idValor':id
+							},
+						  	body : datosJSON
+						}
+
+						instructor_put(url_modificar, init_modificar);
+						
+						async function instructor_put(url, init) {
+
+							const objJSdatos = await fetchSynchronousPUT(url, init);
+							let estatus     = objJSdatos.status;
+							let titulo      = objJSdatos.titulo;
+							let msj_request = objJSdatos.mensaje;
+							let numReg      = objJSdatos.numReg;
+
+							mensaje_titulo.innerText = titulo;
+							mensaje_cuerpo.innerText = "Registros Modificador: " + numReg + "  " + msj_request;	
+							mensaje.showModal();
+						}
+					}
+					activarCaptura(true, false);
+					activarBotones(true, true, true, true);
+
+					accion = 0;
+				});
+				btn_eliminar.addEventListener("click", ()=>{
+					activarCaptura(true, true);
+					activarBotones(false, true, true, true);
+
+					let url_eliminar = "http://apirest.com/instructors";
+
+					//Necesitamos el id para mandarlo por el body
+					let id_eliminar = document.getElementById("id").value;
+					let objetoJS_eliminar = {
+					    id_instructor: id_eliminar
+					}
+
+					let datosJSON_eliminar = JSON.stringify(objetoJS_eliminar); 						
+
+					let init_eliminar = {
+						method : 'delete',
+						headers : {
+							'Content-Type': 'application/json',
+						},
+					  	body : datosJSON_eliminar
+					}
+
+					instructor_delete(url_eliminar, init_eliminar);
+					
+					async function instructor_delete(url, init) {
+
+						const objJSdatos = await fetchSynchronousDELETE(url, init);
+						let estatus     = objJSdatos.status;
+						let titulo      = objJSdatos.titulo;
+						let msj_request = objJSdatos.mensaje;
+
+						mensaje_titulo.innerText = titulo;
+						mensaje_cuerpo.innerText = msj_request;	
+						mensaje.showModal();
+
+					}
+
+					limpiar();
+				});
+
+				btn_limpiar.addEventListener("click", ()=>{
+					activarCaptura(true, true);
+					activarBotones(false, true, true, true);
+					limpiar();
+				});
+
+
+
+			});
+
+		// **************************************************************
+		//	FUNCIONES DE NAVEGACION EN LA GUI
+		// **************************************************************
+			function referencias(){
+				document.getElementById('id');
+				document.getElementById("nombre");
+				document.getElementById("usuario");
+				document.getElementById("correo");
+				document.getElementById("fecha_creacion");
+				document.getElementById("fecha_modificacion");
+
+			}
+
+			function limpiar(){
+				id.value = "";
+				nombre.value = "";
+				usuario.value = "";
+				correo.value = "";
+				fecha_creacion.value = "";
+				fecha_modificacion.value = "";
+			}
+
+			function activarCaptura(todos, resto){
+				id.disabled        = todos;
+				nombre.disabled    = resto;
+				usuario.disabled   = resto;
+				correo.disabled    = resto;
+				fecha_creacion.disabled     = resto;
+				fecha_modificacion.disabled = resto;			
+			}
+
+
+			function activarBotones(nuevo, modificar, guardar, eliminar){
+				btn_nuevo.disabled     = nuevo;
+				btn_modificar.disabled = modificar;
+				btn_guardar.disabled   = guardar;
+				btn_eliminar.disabled  = eliminar;
+			}
+
+	</script>
+</head>
+<body>
+	<header>
+		<h1>CONSULTAR INSTRUCTOR</h1>
+	</header>
+	<nav>
+		<h2>AQUI VA EL MENU</h2>
+	</nav>
+	<section>
+		<form id="datos_instructor">
+			<label for='id'>ID</label> <br>
+			<input type="text" id='id' disabled><br>
+			<label for='nombre' >NOMBRE</label> <br>
+			<input type="text" id='nombre' name = "name_instructor" disabled><br>
+			<label for='usuario'>USUARIO</label> <br>
+			<input type="text" id='usuario' name = "username_instructor" disabled><br>
+			<label for='correo'>CORREO</label> <br>
+			<input type="text" id='correo' name = "email_instructor" disabled><br>
+			<label for='fecha_creacion'>CLIENTE DESDE</label> <br>
+			<input type="date" id='fecha_creacion' name = "date_create_instructor"  disabled><br>
+			<label for='fecha_modificacion'>ULTIMA MODIFICACION</label> <br>
+			<input type="datetime" id='fecha_modificacion' disabled><br><br>
+
+			<!-- BUSQUEDA -->
+			<label for='busqueda_cbo'>BUSQUEDA</label> 
+			<select id="cbo_instructores">
+			</select>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type='text' id='txt_busqueda'> <br><br>
+
+			<!-- BOTONES -->
+			<button id='btn_nuevo' type="button">
+				NUEVO
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_modificar' type="button">
+				MODIFICAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_guardar' type="button" disabled>
+				GUARDAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_eliminar' type="button" >
+				ELIMINAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_limpiar' type="button">
+				LIMPIAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_cerrar' type="button">
+				CERRAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+		</form>
+	</section>
+
+	<dialog id="ms" style="width:400px;">
+		<h2 id="msg_titulo">
+		!Vuelve a la sombra!
+		</h2>
+		<p id="msg_cuerpo">
+		Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+		Harum unde totam tempore suscipit, voluptatem cumque beatae, 
+		esse quisquam a ducimus hic! Ratione distinctio accusamus 
+		numquam facere nulla, vitae perspiciatis consectetur.
+		</p>
+		<button id="cerrar">Cerrar</button>
+	</dialog>	
+
+</body>
+</html>

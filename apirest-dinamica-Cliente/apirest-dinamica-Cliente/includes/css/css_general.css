@@ -1,0 +1,73 @@
+/***************************************************
+ tablas 
+ 
+***************************************************/ 
+table{
+	margin: 10px auto;
+}
+
+table, td, th{
+	border: 2px solid black;
+}
+
+tr:hover{
+	background-color: blue;
+	color:white;
+}
+
+.non{
+	background-color: silver;
+	color:blue;
+}
+
+.par{
+	background-color: aqua;
+	color:green;
+}
+
+.btn_img{
+	width:50px;
+}
+/****************************************************
+Mensajes  
+***************************************************/
+
+#ms{
+	background-color: silver;
+	border:none;
+	box-shadow: 2px 2px 20px black inset;
+	border-radius: 10px;
+}
+#msg_titulo{
+	color:silver;
+	background-color: black;
+	box-shadow: 2px 2px 20px silver inset;
+	margin:0 auto; 
+	text-align:center;
+	border-radius: 10px;
+	padding: 5px;
+}	
+#msg_cuerpo{
+	text-align: justify;
+}
+#cerrar{
+	display:block;
+	padding-left: 10px;
+	padding-right: 10px;
+	margin:5px auto;
+	border-radius: 5px;
+	text-align:center;
+}
+
+/************************************
+NO PERMITIR SELECCIONAR TEXT CORREO
+************************************/
+.noSeleccionable {
+-webkit-user-select: none;
+-webkit-touch-callout: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+color: #cc0000;
+}
+

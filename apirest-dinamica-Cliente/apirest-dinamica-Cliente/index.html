@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CLIENTE API REST</title>
+
+	<link rel="stylesheet" href="/includes/css/css_general.css">
+	<script type="text/javascript" src="/includes/js/tablas/tablas.js"></script>
+	<script type="text/javascript" src="/includes/js/fetch/solicitud_fetch.js"></script>
+
+
+	<script>
+		
+		window.addEventListener("load", ()=>{
+
+			/*****************************************************************************
+			Evento para los Botones
+			****************************************************************************/
+			let registros = document.querySelector('#contenedor_tbody');
+            registros.addEventListener('click', e => {
+               let btn = e.target;
+               id = btn.getAttribute("value");
+
+               alert("EL ID ES: " + id);
+               //id_instructor = id.substring(2);
+               //alert("EL ID ES: " + id + "EL ID DEL INSTRUCTOR ES: " + id_instructor);
+               
+               /***********************************************************
+               Para una mayor referencia ver:
+               https://es.javascript.info/localstorage 
+               Es un buen documento web
+
+               Puedes guardar todo el areglo JSON para despues recuperar un objeto del 
+               arreglo o algunos objetos del arreglo sin la necesidad de ir a la Base de Datos
+               aqui no se implementa dicha carecteristica solo guardamoe el ID
+               *******************************************************/
+               //localStorage.setItem('id_instructor', id);
+               sessionStorage.setItem('id_instructor', id);
+
+                //if(e.target.classList.contains('btn_mantenimiento')){
+                if(e.target.classList.contains('btn_img')){	
+
+                    window.location.assign("crud_instructor.html");	
+                }                                
+            });
+
+
+			/******************************************************************
+			MENSAJES 
+			******************************************************************/
+			let mensaje        = document.getElementById('ms');
+			let mensaje_titulo = document.getElementById('msg_titulo');
+			let mensaje_cuerpo = document.getElementById('msg_cuerpo');			
+
+			// ********************************************************
+			// Cerrar la caja de dialogo del mensaje
+			// ****************************************************
+			let obj_cerrar = document.getElementById("cerrar");
+			obj_cerrar.addEventListener("click", function(){
+				mensaje.close();
+			});
+
+
+			/*************************************************************
+			
+			PETICION AL SERVIDOR "API REST"
+			 
+			************************************************************/
+
+			function desplegarInformacion(objJSdatos){
+				let estatus     = objJSdatos.status;
+				//let datos     = objJSdatos['datos']; //Con comillas
+				let datos       = objJSdatos.datos; //Sin comillas
+				let titulo      = objJSdatos.titulo;
+				let msj_request = objJSdatos.mensaje; 
+
+				if(estatus == 200){
+					total = datos.length;
+					console.log(total);
+					let titulos = ["ID", "NOMBRE","CORREO","USUARIO", "FECHA CREACIÓN", 
+						"ACCIÓN"];
+
+					//Simpre debe ir como primer elemento la llave primaria
+					let campos = ["id_instructor", "name_instructor", "email_instructor", "username_instructor", "date_create_instructor", null];
+
+					//1 = cadena, 2 = boton, 3 = text, 4 = radio, 5 = check 6 = null
+					let tipo = [1,1,1,1,1,2];
+					let contenedorTHead = document.getElementById("contenedor_thead");
+					let contenedorTBody = document.getElementById("contenedor_tbody");
+
+					tabla(titulos, campos, tipo, datos, contenedorTHead, contenedorTBody)
+
+					mensaje_titulo.innerText = titulo;
+					mensaje_cuerpo.innerText = total + " " + msj_request;
+					//mensaje_cuerpo.innerText = msj_request;						
+				}else{
+					mensaje_titulo.innerText = titulo;
+					mensaje_cuerpo.innerText = msj_request;						
+				}					
+				mensaje.showModal();
+
+			}
+
+			async function request() {
+			  const objJSdatos = await fetchSynchronousGET(url, init);
+			  //console.log(objJSdatos);
+			  desplegarInformacion(objJSdatos);
+			}
+
+			//let url = "apirest.com/instructors?columnas=*";
+			//let url = "http://apirest.com/instructors?columnas=*&linkTo=name_instructor&operadorRelTo==&valueTo=ZERO CAGE";
+			let url = "http://apirest.com/instructors?columnas=*";
+
+			let init = {
+				method : 'get',
+			  	header : {
+			  		'Content-Type': 'application/json'
+			  	}
+			}
+
+			request(url, init);
+
+
+		});
+
+	</script>
+
+</head>
+<body>
+	<header>
+		<h1>CLIENTE PARA LA API REST</h1>
+	</header>
+	<nav>
+		<h2>MENU DE NAVEGACIÓN</h2>
+	</nav>
+	<section>
+		<table id=instructores>
+			<thead id="contenedor_thead">
+<!--			
+				<th>ID</th>		
+				<th>NOMBRE</th>
+				<th>CORREO</th>
+				<th>USUARIO</th>
+				<th>FECHA CREACIÓN</th>
+				<th>CONSULTAR</th>
+				<th>MODIFICAR</th>
+				<th>ELIMINAR</th>
+				<th>TODO</th>
+-->
+			</thead>
+			
+			<tbody id=contenedor_tbody>
+				
+			</tbody>
+		</table>
+		
+	</section>
+	<dialog id="ms" style="width:400px;">
+		<h2 id="msg_titulo">
+		!Vuelve a la sombra!
+		</h2>
+		<p id="msg_cuerpo">
+		Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+		Harum unde totam tempore suscipit, voluptatem cumque beatae, 
+		esse quisquam a ducimus hic! Ratione distinctio accusamus 
+		numquam facere nulla, vitae perspiciatis consectetur.
+		</p>
+		<button id="cerrar">Cerrar</button>
+	</dialog>	
+</body>
+</html>

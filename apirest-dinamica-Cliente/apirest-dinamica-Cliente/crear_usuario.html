@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CREACION DE USUARIOS</title>
+
+	<link rel="stylesheet" type="text/css" href="/includes/css/css_general.css">
+	<link rel="stylesheet" type="text/css" href="/includes/css/icomoon.css">
+	<script type="text/javascript" src="/includes/js/fetch/solicitud_fetch.js"></script>
+
+<style>
+	
+.invalida{
+	color:red;
+}
+.valida{
+	color:green;
+}	
+
+span span { 
+	display: none; 
+}
+
+#contAyuda{
+	font-size: 18px;
+	color:green;
+}
+.mensajeAjuda{
+	*display: block;
+	color: #FFFFFF; 
+	background-color:rgb(170,170,170);
+	width: 200px; 
+	height: 150px; 
+	padding: 5px 5px;
+	border-radius: 5px;
+	text-align: justify;	
+}
+
+
+#pswd_info{ 
+	display: none; 
+}
+
+
+#password:focus + #pswd_info{
+	display: block;
+	color: #FFFFFF; 
+	background-color:rgb(170,170,170);
+
+	width: 350px; 
+	height: 150px; 
+	padding: 5px 5px;
+	border-radius: 5px;
+	text-align: justify;
+}
+
+
+
+
+</style>
+
+	<script>
+
+		//Funcionalidad para la ayuda del password
+		window.addEventListener("load", ()=>{
+
+			let numChars = document.getElementById("numCaracteres"); 
+			let numeros  = document.getElementById("numeros");
+			let letras   = document.getElementById("letras"); 
+
+			let objPassword = document.getElementById("password");
+			objPassword.addEventListener("keyup", ()=>{
+				let pswd = objPassword.value;
+
+
+				/*
+				obj.classList.contains("foo")
+				obj.classList.remove("foo");
+				obj.classList.add("anotherclass");
+				*/
+
+				//Validar el tamaño
+				if(pswd.length < 6){
+					numChars.classList.remove("valida");
+					numChars.classList.add("invalida");
+				}else{
+					numChars.classList.remove("invalida");
+					numChars.classList.add("valida");				
+				}
+
+		        //validar letras
+		        if ( pswd.match(/[A-z]/) ) {
+					letras.classList.remove("invalida");
+					letras.classList.add("valida");
+		        } else {
+					letras.classList.remove("valida");
+					letras.classList.add("invalida");
+		        }
+
+		        //validar numero
+		        if ( pswd.match(/\d/) ) {
+					numeros.classList.remove("invalida");
+					numeros.classList.add("valida");
+		        } else {
+					numeros.classList.remove("valida");
+					numeros.classList.add("invalida");
+		        }
+
+			});
+
+
+			function datosAyuda(idIcono, idTexto){
+				//El siguiente metodo nos proporciona informacion del top,
+				// left, right, borrom, width height de un elemento
+				let posicionReal = idIcono.getBoundingClientRect();
+
+				let top_icono   = posicionReal.top;
+				let left_icono  = posicionReal.left;
+			    let ancho_icono = posicionReal.width;
+			    let alto_icono  = posicionReal.height;
+
+				let top_texto  = top_icono - alto_icono;
+				let left_texto = left_icono + ancho_icono;
+			 	top_texto  += "px";
+				left_texto += "px";
+				let posicion = {
+					top : top_texto,
+					left: left_texto
+				};
+				return posicion;
+			}
+
+			let obj_ayuda_icono = document.getElementById("contAyuda");
+			let obj_ayuda_texto = document.getElementById("contAyuda1");
+
+			obj_ayuda_icono.addEventListener("mouseenter", ()=>{
+		     	let posicion = datosAyuda(obj_ayuda_icono, obj_ayuda_texto);
+
+		     	obj_ayuda_texto.style.display  = 'block';
+		     	obj_ayuda_texto.style.position = 'absolute';
+		     	obj_ayuda_texto.style.top      = posicion["top"];
+		     	obj_ayuda_texto.style.left     = posicion["left"];
+
+			});
+
+			obj_ayuda_icono.addEventListener("mouseleave", ()=>{
+		     	obj_ayuda_texto.style.display  = 'none';
+
+			});
+
+		});
+
+		window.addEventListener("load", function(){ 
+
+			// ****************************************** 
+			//BOTONES
+			// ******************************************
+			let btn_gardar    = document.getElementById("btn_guardar");
+			let btn_limpiar   = document.getElementById("btn_limpiar");
+
+			// ******************************************************
+			// Elementos de captura
+			// ******************************************************
+			let nombre    = document.getElementById("nombre");
+			let correo    = document.getElementById("correo");
+			let correo2   = document.getElementById("correo2");
+			let password  = document.getElementById("password");
+			let password2 = document.getElementById("password2");
+
+			// *****************************************************************
+			// MENSAJES 
+			// ******************************************************************
+			let mensaje        = document.getElementById('ms');
+			let mensaje_titulo = document.getElementById('msg_titulo');
+			let mensaje_cuerpo = document.getElementById('msg_cuerpo');			
+
+			// ***************************************************************
+			// Cerrar la caja de dialogo del mensaje
+			// ***************************************************************
+			let obj_cerrar = document.getElementById("cerrar");
+			obj_cerrar.addEventListener("click", function(){
+				mensaje.close();
+			});
+
+			function verificarIguales(objeto1, objeto2, tipo){
+				let valor1 = objeto1.value;
+				let valor2 = objeto2.value;
+				valor1 = valor1.trim();
+				valor2 = valor2.trim();
+
+
+				if(valor1 == "" || valor2 == ""){
+					mensaje_titulo.innerText = "ERROR EN " + tipo;
+					mensaje_cuerpo.innerText = "ESTAN VACIOS"
+					mensaje.showModal();	
+					return false;				
+				}
+
+				if(valor1 == null || valor2 == null){
+					mensaje_titulo.innerText = "ERROR EN " + tipo;
+					mensaje_cuerpo.innerText = "NO TRAEN INFORMACÓN";
+					mensaje.showModal();
+					return false;					
+				}
+
+
+				if (objeto1.value != objeto2.value) {
+					mensaje_titulo.innerText = "ERROR EN " + tipo;
+					mensaje_cuerpo.innerText = "SON DISTINTOS";	
+					mensaje.showModal();					
+			        return false;
+				}
+
+				if (objeto1.value == objeto2.value) {
+					if(tipo == "CORREO"){
+						let arroba1 = valor1.indexOf("@");
+						if(arroba1 < 0){
+							mensaje_titulo.innerText = "ERROR EN " + tipo;
+							mensaje_cuerpo.innerText = "NO TRAEN @";	
+							mensaje.showModal();							
+							return false
+						}else{
+							return true;
+						}
+					}
+					return true
+				}
+				return true;
+			}
+
+			btn_guardar.addEventListener("click", ()=>{
+				let bandera = false;
+				if(verificarIguales(correo, correo2, "CORREO")){
+					if(verificarIguales(password, password2, "PASSWORD")){
+						bandera = true;
+					}
+				}
+				if(bandera){
+					url_nuevo = "http://apirest.com/instructors?registro=true&subFijo=instructor";
+
+					const formulario = document.getElementById("datos_instructor");
+					const datosForm  = new FormData(formulario);
+					//Es importante mencionar que el input cuya propiedad id = id,
+					// no tiene la propiedad name por lo tanto no se agrega al
+					// objeto datosForm.
+					//lo mismo sucede con el input id='fecha_modificacion' 
+					const datosObjJS = Object.fromEntries(datosForm); 
+					const datosJSON  = JSON.stringify(datosObjJS);
+					console.log(datosJSON);
+
+					init_nuevo = {
+						method : 'post',
+					  	header : {
+					  		'Content-Type': 'application/json'
+					  	},
+					  	body : datosJSON
+					}
+
+					instructor_post(url_nuevo, init_nuevo);
+						
+					async function instructor_post(url, init) {
+
+						const objJSdatos = await fetchSynchronousPOST(url, init);
+						let estatus     = objJSdatos.status;
+						let id          = objJSdatos.id;
+						let titulo      = objJSdatos.titulo;
+						let msg_request = objJSdatos.mensaje;
+
+						mensaje_titulo.innerText = titulo;
+						mensaje_cuerpo.innerText = msg_request;	
+						mensaje.showModal();
+
+						if(estatus == 200){
+							let datos = objJSdatos.datos;
+							let token = datos.token;
+							let token_exp = datos.token_exp;
+							//Guardarlos en un variable de session
+							sessionStorage.setItem("token", token);
+							sessionStorage.setItem("token_exp", token_exp);
+						}
+
+
+					}
+
+				}
+
+			});
+
+			btn_limpiar.addEventListener("click", ()=>{
+				limpiar();
+			});
+
+		});
+
+
+		function limpiar(){
+			id.value = "";
+			nombre.value = "";
+			usuario.value = "";
+			correo.value = "";
+			fecha_creacion.value = "";
+			fecha_modificacion.value = "";
+		}
+
+	</script>
+</head>
+<body>
+	<header>
+		<h1>CREACION DE USUARIOS</h1>
+	</header>
+	<nav>
+		<h2>AQUI VA EL MENU</h2>
+	</nav>
+	<section>
+		<form id="datos_instructor">
+			<label for='nombre' >NOMBRE</label> <br>
+			<input type="text" id='nombre' name = "name_instructor" required><br>
+			
+			<label for='correo'>CORREO</label> <br>
+			<input type="email" id='correo' name = "email_instructor" required
+			class=".noSeleccionable"  onmousedown="return false"
+			onselectstart="return false" onpaste="return false;" onCopy="return false" onCut="return false" onDrag="return false" onDrop="return false" autocomplete=off><br>
+			
+			<label for='correo2'>CONFIRMAR CORREO</label> <br>
+			<input type="email" id='correo2' class=".noSeleccionable"  
+			onmousedown="return false"
+			onselectstart="return false" onpaste="return false;" onCopy="return false" onCut="return false" onDrag="return false" onDrop="return false" autocomplete=off><br><br>
+			
+			<label for='password'>PASSWORD</label>
+			<span class='icon-help ayuda' id="contAyuda">
+				<span class='mensajeAjuda' id="contAyuda1">Debe tener minimo 6 caracteres (letras y digitos) de los cuales. Por lo menos debe tener un digito.
+				</span>
+			</span>
+			<br><br>
+
+			<input type="password" id='password' name ="password_instructor" required
+			class=".noSeleccionable"  
+			onmousedown="return false"
+			onselectstart="return false" onpaste="return false;" onCopy="return false" onCut="return false" onDrag="return false" onDrop="return false" autocomplete=off>
+
+			<div id="pswd_info">
+			   <h4>La contraseña debería cumplir con los siguientes requerimientos:</h4>
+				<ul style='list-style-position: inside;
+					padding-left: 10px;'>
+			      <li id="letras">Al menos debería tener <strong>una letra</strong></li>
+			      <li id="numeros">Al menos debería tener <strong>un número</strong></li>
+			      <li id="numCaracteres">Debería tener <strong>6 carácteres</strong> como mínimo</li>
+			   </ul>
+			</div>						
+
+			<br><br>
+			<label for='password2'>CONFIRMAR PASSWORD</label> <br>
+			<input type="password" id='password2'
+			class=".noSeleccionable"  
+			onmousedown="return false"
+			onselectstart="return false" onpaste="return false;" onCopy="return false" onCut="return false" onDrag="return false" onDrop="return false" autocomplete=off><br><br>
+
+			<!-- BOTONES -->
+			<button id='btn_guardar' type="button">
+				GUARDAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+			<button id='btn_limpiar' type="button">
+				LIMPIAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+		</form>
+	</section>
+
+	<dialog id="ms" style="width:400px;">
+		<h2 id="msg_titulo">
+		!Vuelve a la sombra!
+		</h2>
+		<p id="msg_cuerpo">
+		Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+		Harum unde totam tempore suscipit, voluptatem cumque beatae, 
+		esse quisquam a ducimus hic! Ratione distinctio accusamus 
+		numquam facere nulla, vitae perspiciatis consectetur.
+		</p>
+		<button id="cerrar">Cerrar</button>
+	</dialog>	
+
+</body>
+</html>

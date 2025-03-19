@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>CONSULTAR INSTRUCTOR</title>
+
+	<link rel="stylesheet" type="text/css" href="/includes/css/css_general.css">
+	<script type="text/javascript" src="/includes/js/fetch/solicitud_fetch.js"></script>
+	<script type="text/javascript" src="/includes/js/combosBox/comboBox.js"></script>
+	<script type="text/javascript" src="/includes/js/formularios/desplegarDatosFormularios.js"></script>
+
+	<script>
+			window.addEventListener("load", function(){
+
+				/******************************************************************
+				MENSAJES 
+				******************************************************************/
+				let mensaje        = document.getElementById('ms');
+				let mensaje_titulo = document.getElementById('msg_titulo');
+				let mensaje_cuerpo = document.getElementById('msg_cuerpo');			
+
+				/******************************************************************
+				Cerrar la caja de dialogo del mensaje
+				******************************************************************/
+				let obj_cerrar = document.getElementById("cerrar");
+				obj_cerrar.addEventListener("click", function(){
+					mensaje.close();
+				});
+
+
+				/******************************************************
+				Vamos a la API a traernos los datos del cliente
+				seleccionado en la Tabla
+				*******************************************************/
+
+				// **************************************************************
+				//Recuperamos el valor guardado en el localStorage o bien en el
+				//sessionStorage
+				//***************************************************************
+				//let id = localStorage.getItem('id_instructor');
+				let id_instructor = sessionStorage.getItem('id_instructor');
+				//alert("EL ID ES: " + id);
+
+
+				let url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=id_instructor&operadorRelTo==&valueTo=${id_instructor}`;
+
+				let init_un_instructor = {
+					method : 'get',
+				  	header : {
+				  		'Content-Type': 'application/json'
+				  	}
+				}
+
+				solicitarUnInstructor(url_un_instructor, init_un_instructor);
+				
+				async function solicitarUnInstructor(url, init) {
+				  const objJSdatos = await fetchSynchronousGET(url, init);
+				  let resultadoDesplegar = desplegarInformacionUnInstructor(objJSdatos);
+				  if(resultadoDesplegar != null){
+
+						mensaje_titulo.innerText = resultadoDesplegar.titulo;
+						mensaje_cuerpo.innerText = resultadoDesplegar.mensaje;	
+						mensaje.showModal();				  	
+
+				  }
+				}
+
+				// ****************************************************************
+				 
+				//Vamos a la API A TRAERNOS A TODOS LOS INSTRUCTORES PARA LLENAR EL
+				//COMBO BOX DE BUSQUEDA 
+				
+				//Tenga en cuenta que el fetch trabaja de forma asincrona por lo tanto
+				//no se sabe a ciencia sierta cual de los 2 fetch va a terminar primero.
+
+				//Cuando se utilizan reiteradamente los mismos datos hubiese convenido haber
+				//guardado los datos (cuando se consultaron para la tabla) de los instructores 
+				//en un localStorage o bien en un  localStorage o mucho mejor en un indexedDB:
+				//https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/
+				//Basic_Terminology
+				//https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB				 
+				
+				// ***************************************************************
+
+				//let contenedor = document.getElementById("instructores");
+				let url_instructores = `http://apirest.com/instructors?columnas=*&orderBy=name_instructor&orderMode=ASC`;
+
+				let init_instructores = {
+					method : 'get',
+				  	header : {
+				  		'Content-Type': 'application/json'
+				  	}
+				}
+
+				solicitarTodosInstructores(url_instructores, init_instructores);
+				
+				async function solicitarTodosInstructores(url, init) {
+				  const objJSdatos = await fetchSynchronousGET(url, init);
+				  prepararDatosComboBox(objJSdatos);
+				}
+				
+				//*******************************************************
+				// Funciones para desplegar los datos 
+				  
+				// ******************************************************
+				function prepararDatosComboBox(respuesta){
+					datos = respuesta.result;
+					cbo_instructores = document.getElementById("cbo_instructores");
+					let campos = {
+						value     : "id_instructor",
+						contenido : "name_instructor"
+					}
+					desplegarDatosComboBox(campos, cbo_instructores, datos);
+				}
+
+
+				// ***************************************************************
+				//EVENTO DEL COMBO BOX DE BUSQUEDA
+				//En este ejemplo este elemento se utiliza principalmente para realizar 
+				//una busqueda por lo tanto tenemos que programar el evento change  
+				// ****************************************************************
+				
+
+				
+				let cbo_instructores = document.getElementById("cbo_instructores");
+				cbo_instructores.addEventListener("change", ()=>{
+
+					let id = cbo_instructores.value;
+					url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=id_instructor&operadorRelTo==&valueTo=${id}`;
+
+					init_un_instructor = {
+						method : 'get',
+					  	header : {
+					  		'Content-Type': 'application/json'
+					  	}
+					}
+					
+					solicitarUnInstructor(url_un_instructor, init_un_instructor);
+
+				});
+
+				// *************************************************************
+				//EVENTO DE LA CAJA DE TEXTO DE BUSQUEDA
+				//En este ejemplo este elemento se utiliza principalmente para realizar una busqueda por lo tanto tenemos que programar el evento change  
+				// *****************************************************************
+				
+				let txt_busqueda = document.getElementById("txt_busqueda");
+				
+				txt_busqueda.addEventListener("input", ()=>{
+					let nombre = txt_busqueda.value;
+					//alert("EL ID DEL SELECCIONADO ES: " + nombre);
+
+					// ******************************************************
+					//Vamos a la API a traernos los datos de ese cliente
+					// ******************************************************
+
+					url_un_instructor = `http://apirest.com/instructors?columnas=*&linkTo=name_instructor&operadorRelTo=like&valueTo=${nombre}%`;
+
+					init_un_instructor = {
+						method : 'get',
+					  	header : {
+					  		'Content-Type': 'application/json'
+					  	}
+					}
+
+					solicitarUnInstructor(url_un_instructor, init_un_instructor);
+
+				});
+
+			});
+	</script>
+</head>
+<body>
+	<header>
+		<h1>CONSULTAR INSTRUCTOR</h1>
+	</header>
+	<nav>
+		<h2>AQUI VA EL MENU</h2>
+	</nav>
+	<section>
+		<form>
+			<label for='id'>ID</label> <br>
+			<input type="text" id='id' disabled><br>
+			<label for='nombre'>NOMBRE</label> <br>
+			<input type="text" id='nombre'><br>
+			<label for='usuario'>USUARIO</label> <br>
+			<input type="text" id='usuario'><br>
+			<label for='correo'>CORREO</label> <br>
+			<input type="text" id='correo'><br>
+			<label for='fecha_creacion'>CLIENTE DESDE</label> <br>
+			<input type="date" id='fecha_creacion'><br>
+			<label for='fecha_modificacion'>ULTIMA MODIFICACION</label> <br>
+			<input type="datetime" id='fecha_modificacion'><br><br>
+			<label for='busqueda_cbo'>BUSQUEDA</label> 
+
+			<select id="cbo_instructores">
+			</select>
+			&nbsp;&nbsp;&nbsp;&nbsp;
+			<input type='text' id='txt_busqueda'>
+
+		</form>
+	</section>
+
+	<dialog id="ms" style="width:400px;">
+		<h2 id="msg_titulo">
+		!Vuelve a la sombra!
+		</h2>
+		<p id="msg_cuerpo">
+		Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+		Harum unde totam tempore suscipit, voluptatem cumque beatae, 
+		esse quisquam a ducimus hic! Ratione distinctio accusamus 
+		numquam facere nulla, vitae perspiciatis consectetur.
+		</p>
+		<button id="cerrar">Cerrar</button>
+	</dialog>	
+
+</body>
+</html>

@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservaciones</title>
+   <script defer src="indexP.js"></script>
+    <link rel="stylesheet" href="indexP.css">
+    <link rel="stylesheet" type="text/css" href="CSSGENERAL.css">
+    <script defer src="ScriptRecervaciones.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="../solicitud_fetch.js"></script>
+
+    
+  
+</head>
+<body>
+    <header>
+        <img id="logo" src="logo.png" alt="">
+        <h1 style="color: #474740;" id="tituloMenu">Reservaciones</h1>
+    </header> 
+    <br>
+    <section id="SeleccionarTodo">
+    <div id="Sucursal">
+   <label for="Sucursales">Sucursal</label>
+    <select name="Sucursales" id="Sucursales"></select>
+    </div>
+    <div id="calend">
+    <label for="calendar">Fecha</label>
+    <table id="calendar">
+        <thead>
+        <caption> </caption>
+        <tr>
+           <th>
+                     Lun
+           </th>
+           <th>
+                     Mar
+           </th>
+           <th>
+                     Mie
+           </th>
+           <th>
+                     Jue
+           </th>
+           <th>
+                     Vie
+           </th>
+           <th>
+                     Sab
+           </th>
+           <th>
+                     Dom
+           </th>
+       </tr>
+      </thead>
+        <tbody> </tbody>
+      </table>
+    </div>
+    <div id="Hora">
+   <label for="Horas">Hora</label>
+    <select name="Horas" id="Horas"></select>
+    </div>
+    <div id="Mesa">
+        <label for="Mesa">Mesa</label>
+        <select name="Mesas" id="Mesas"></select>
+        </div>
+    </section>
+    <br>
+   <center> <img src="mesas.png" alt="" width="600px" height="300px"> </center>
+
+    <!--
+        Menu
+    -->
+    <div id="sidebar" class="sidebar">
+        <a href="#" class="boton-cerrar" onclick="ocultar()"><img src="boton.png" alt=""></a>
+        <ul class="menu">
+            <li><a href="http://bluehour.com/">Café</a></li>
+            <li><a href="../Menu/menu.html">Menu</a></li>
+            <li><a href="../Reservaciones/reservaciones.html">Reservaciones</a></li>
+            <li><a href="../Mis Pedidos/misPedidos.html">Mis pedidos</a></li>
+            
+        </ul>
+    </div>
+
+    <div id="contenido" class="sidebar2">
+     <a id="abrir" class="abrir-cerrar" href="javascript:void(0)" onclick="mostrar()" ><img src="boton.png" alt=""></a>
+    </div>
+    
+    <br><br>
+    <div id="botonesCentro">
+
+       <!-- Botón de Confirmación y Diálogo -->
+       <button id="confirmarBtn">Confirmar</button>
+       <button id="cancelarBtn">Cancelar</button>
+
+    </div>
+   
+       <div id="confirmacionDialog" class="dialog hidden">
+         <p>Confirmación exitosa.</p>
+         <p>Datos seleccionados:</p>
+         <p id="datosSeleccionados"></p>
+         <p>Número de reservacion <span id="numeroConfirmacion"></span></p>
+         <button id="cerrarDialogBtn">Cerrar</button>
+       </div>
+   
+       <!-- Diálogo de Cancelación -->
+       <div id="cancelacionDialog" class="dialog hidden">
+         <p>Por favor, ingrese su número de orden para cancelar:</p>
+         <input type="text" id="numeroOrdenInput" placeholder="Número de reservacion">
+         <button id="confirmarCancelacionBtn">Confirmar Cancelación</button>
+         <button id="cerrarCancelacionDialogBtn">Cerrar</button>
+       </div>
+   
+       <!-- Diálogo de Cancelación Exitosa -->
+       <div id="cancelacionExitosaDialog" class="dialog hidden">
+         <p>Cancelación exitosa de la orden con el número:</p>
+         <p id="numeroOrdenCancelacion"></p>
+         <button id="cerrarCancelacionExitosaDialogBtn">Cerrar</button>
+       </div>
+
+       <script>
+
+       </script>
+
+
+</body>
+</html>

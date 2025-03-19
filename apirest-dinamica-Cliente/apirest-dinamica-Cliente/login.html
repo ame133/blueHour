@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>INICIAR SESION</title>
+
+	<script type="text/javascript" src="/includes/js/fetch/solicitud_fetch.js"></script>
+
+
+	<script>
+
+		window.addEventListener("load", function(){ 
+
+			// ******************************************************
+			// Elementos de captura
+			// ******************************************************
+			let nombre    = document.getElementById("nombre");
+			let correo    = document.getElementById("correo");
+			let correo2   = document.getElementById("correo2");
+			let password  = document.getElementById("password");
+			let password2 = document.getElementById("password2");
+
+			// *****************************************************************
+			// MENSAJES 
+			// ******************************************************************
+			let mensaje        = document.getElementById('ms');
+			let mensaje_titulo = document.getElementById('msg_titulo');
+			let mensaje_cuerpo = document.getElementById('msg_cuerpo');			
+
+			// ***************************************************************
+			// Cerrar la caja de dialogo del mensaje
+			// ***************************************************************
+			let obj_cerrar = document.getElementById("cerrar");
+			obj_cerrar.addEventListener("click", function(){
+				mensaje.close();
+			});
+
+
+
+			let btn_ingresar    = document.getElementById("btn_ingresar");
+			btn_ingresar.addEventListener("click", ()=>{
+
+				url = "http://apirest.com/instructors?login=true&subFijo=instructor";
+
+				const formulario = document.getElementById("datos_instructor");
+				const datosForm  = new FormData(formulario);
+				const datosObjJS = Object.fromEntries(datosForm); 
+				const datosJSON  = JSON.stringify(datosObjJS);
+
+
+				init = {
+					method : 'post',
+				  	header : {
+				  		'Content-Type': 'application/json'
+				  	},
+				  	body : datosJSON
+				}
+					
+				instructor_post(url, init);
+				async function instructor_post(url, init) {
+
+					const objJSdatos = await fetchSynchronousPOST(url, init);
+					let estatus     = objJSdatos.status;
+					let id          = objJSdatos.id;
+					let titulo      = objJSdatos.titulo;
+					let msg_request = objJSdatos.mensaje;
+
+					if(estatus == 200){
+						let datos = objJSdatos.datos;
+						let token = datos.token;
+						let token_exp = datos.token_exp;
+						//Guardarlos en un variable de session
+						sessionStorage.setItem("token", token);
+						sessionStorage.setItem("token_exp", token_exp);
+					}
+
+					mensaje_titulo.innerText = titulo;
+					mensaje_cuerpo.innerText = msg_request;	
+					mensaje.showModal();
+
+				}
+			});
+		});
+
+	</script>
+</head>
+<body>
+	<header>
+		<h1>CREACION DE USUARIOS</h1>
+	</header>
+	<nav>
+		<h2>AQUI VA EL MENU</h2>
+	</nav>
+	<section>
+		<form id="datos_instructor">
+		
+			<label for='correo'>CORREO</label> <br>
+			<input type="email" id='correo' name = "email_instructor" required>
+			<br><br>
+			
+			<label for='password'>PASSWORD</label>
+			<input type="password" id='password' name ="password_instructor" required>
+			<br><br>
+
+			<!-- BOTONES -->
+			<button id='btn_ingresar' type="button">
+				INGRESAR
+			</button> &nbsp;&nbsp;&nbsp;&nbsp;
+		</form>
+	</section>
+
+	<dialog id="ms" style="width:400px;">
+		<h2 id="msg_titulo">
+		!Vuelve a la sombra!
+		</h2>
+		<p id="msg_cuerpo">
+		Lorem ipsum dolor sit amet consectetur, adipisicing elit. 
+		Harum unde totam tempore suscipit, voluptatem cumque beatae, 
+		esse quisquam a ducimus hic! Ratione distinctio accusamus 
+		numquam facere nulla, vitae perspiciatis consectetur.
+		</p>
+		<button id="cerrar">Cerrar</button>
+	</dialog>	
+
+</body>
+</html>
